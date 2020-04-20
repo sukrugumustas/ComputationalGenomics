@@ -1,5 +1,6 @@
 #!usr/bin/python
 import re
+import csv
 
 tab = str.maketrans("ACTG", "TGAC")
 
@@ -11,6 +12,10 @@ def main():
     for origin in sequences:
         sequence = sequences[origin]
         len_seq = len(sequence)
+        print('Origin [%s] -> Output file: %s_output.csv' % (origin, origin))
+        file = open('%s_output.csv' % origin, 'w')
+        csv_writer = csv.writer(file)
+        csv_writer.writerow(['Length', 'K-Mer', 'Count', 'Revcomp', 'Count'])
         for k in range(5, len_seq):
             for i in range(len_seq - k + 1):
                 if sequence[i: i + k] in mer_array:
@@ -20,9 +25,16 @@ def main():
             for i in list(mer_array.keys()):
                 if mer_array[i] <= 1:
                     del mer_array[i]
-        mer_array = {k: v for k, v in sorted(mer_array.items(), key=lambda item: item[1], reverse=True)}
-        for nucleobase in mer_array:
-            print(nucleobase + ' -> %d ' % mer_array[nucleobase])
+            mer_array = {k: v for k, v in sorted(mer_array.items(), key=lambda item: item[1], reverse=True)}
+            if len(mer_array) > 0:
+                for kmer in mer_array:
+                    revcomp = rev_comp(kmer)
+                    rev_comp_val = 0
+                    if mer_array.get(revcomp) is not None:
+                        rev_comp_val = mer_array[revcomp]
+                    csv_writer.writerow([k, kmer, mer_array[kmer], revcomp, rev_comp_val])
+            mer_array.clear()
+        file.close()
 
 
 def get_and_validate_input(filename):
