@@ -1,6 +1,5 @@
 #!usr/bin/python
 import re
-from Bio.Seq import Seq
 
 tab = str.maketrans("ACTG", "TGAC")
 
