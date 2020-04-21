@@ -2,7 +2,7 @@
 import re
 import csv
 
-tab = str.maketrans("ACTG", "TGAC")
+complements = str.maketrans("ACTG", "TGAC")
 
 
 def main():
@@ -18,21 +18,20 @@ def main():
         csv_writer.writerow(['Length', 'K-Mer', 'Count', 'Revcomp', 'Count'])
         for k in range(5, len_seq):
             for i in range(len_seq - k + 1):
-                if sequence[i: i + k] in mer_array:
-                    mer_array[sequence[i:i + k]] += 1
+                kmer = sequence[i: i + k]
+                if kmer in mer_array:
+                    mer_array[kmer] += 1
                 else:
-                    mer_array[sequence[i: i + k]] = 1
-            for i in list(mer_array.keys()):
-                if mer_array[i] <= 1:
-                    del mer_array[i]
-            mer_array = {k: v for k, v in sorted(mer_array.items(), key=lambda item: item[1], reverse=True)}
+                    mer_array[kmer] = 1
             if len(mer_array) > 0:
+                mer_array = {k: v for k, v in sorted(mer_array.items(), key=lambda item: item[1], reverse=True)}
                 for kmer in mer_array:
-                    revcomp = rev_comp(kmer)
-                    rev_comp_val = 0
-                    if mer_array.get(revcomp) is not None:
-                        rev_comp_val = mer_array[revcomp]
-                    csv_writer.writerow([k, kmer, mer_array[kmer], revcomp, rev_comp_val])
+                    if mer_array[kmer] > 1:
+                        revcomp = rev_comp(kmer)
+                        rev_comp_val = 0
+                        if mer_array.get(revcomp) is not None:
+                            rev_comp_val = mer_array[revcomp]
+                        csv_writer.writerow([k, kmer, mer_array[kmer], revcomp, rev_comp_val])
             mer_array.clear()
         file.close()
 
@@ -49,7 +48,7 @@ def get_and_validate_input(filename):
 
 
 def rev_comp(sub_sequence):
-    return sub_sequence.translate(tab)[::-1]
+    return sub_sequence.translate(complements)[::-1]
 
 
 if __name__ == '__main__':
